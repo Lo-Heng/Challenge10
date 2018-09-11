@@ -1,6 +1,7 @@
 package com.bignerdranch.android.criminalintent;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
@@ -33,11 +34,24 @@ public class CrimeListFragment extends Fragment {
 
         return view;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        if(mAdapter == null){
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        }
+        else {
+            mAdapter.notifyItemChanged(1);
+        }
+
     }
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -56,16 +70,19 @@ public class CrimeListFragment extends Fragment {
 
         }
 
+
         @Override
         public void onClick(View view) {
             Toast.makeText(getActivity(),mCrime.getTitle() + " clicked!", Toast.LENGTH_SHORT).show();
+            Intent intent = CrimeActivity.newIntent(getActivity(),mCrime.getId());
+            startActivity(intent);
         }
 
         public void bind(Crime crime){
             mCrime = crime;
             String date;
             date = (String) DateFormat.format("EEEE, MMMM dd, yyyy kk:mm",mCrime.getDate());
-            mTitleTextView.setText(mCrime.getTitle());
+                mTitleTextView.setText(mCrime.getTitle());
             mDateTextView.setText(date);
             mSolvedImageView.setVisibility(mCrime.isSolved() ? View.VISIBLE : View.GONE);
 
